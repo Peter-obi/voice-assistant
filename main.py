@@ -17,18 +17,18 @@ import whisper
 from whisper import load_models
 
 # Configuration
-whisper_model = load_models.load_model("large-v2") # 加载语音识别模型: 'tiny.en', 'tiny', 'base.en', 'base', 'small.en', 'small', 'medium.en', 'medium', 'large-v1', 'large-v2', 'large'
-MODEL_PATH = "models/yi-34b-chat.Q8_0.gguf" # models/yi-chat-6b.Q8_0.gguf, models/yi-34b-chat.Q8_0.gguf
+whisper_model = load_models.load_model("large-v2") # Load speech recognition model: 'tiny.en', 'tiny', 'base.en', 'base', 'small.en', 'small', 'medium.en', 'medium', 'large-v1', 'large-v2', 'large'
+MODEL_PATH = "models/yi-34b-chat.Q8_0.gguf" # Possible models: models/yi-chat-6b.Q8_0.gguf, models/yi-34b-chat.Q8_0.gguf
 
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 44100
-SILENCE_THRESHOLD = 1000 # 500 worked，注意麦克风不要静音（亮红灯）
-SILENT_CHUNKS = 2 * RATE / CHUNK  # 2 continous seconds of silence
+SILENCE_THRESHOLD = 1000 # 500 worked, ensure the microphone is not muted (red light on)
+SILENT_CHUNKS = 2 * RATE / CHUNK  # 2 continuous seconds of silence
 
-NAME = "林亦"
-MIC_IDX = 0 # 指定麦克风设备序号，可以通过 tools/list_microphones.py 查看音频设备列表
+NAME = "Lin Yi"
+MIC_IDX = 0 # Specify microphone device number, check audio device list with tools/list_microphones.py
 DEBUG = True
 
 def compute_rms(data):
@@ -69,7 +69,7 @@ def record_audio():
     stream.close()
     audio.terminate()
 
-    # save audio to a WAV file
+    # Save audio to a WAV file
     with wave.open('output.wav', 'wb') as wf:
         wf.setnchannels(CHANNELS)
         wf.setsampwidth(audio.get_sample_size(FORMAT))
@@ -111,40 +111,37 @@ class VoiceOutputCallbackHandler(BaseCallbackHandler):
             if self.speech_queue.empty():
                 self.tts_busy = False
 
+    import subprocess
 
-    def text_to_speech(self, text):
-        # Convert the generated text to voice using a TTS system
-        # Implement your text-to-speech logic here
-        try:
-            subprocess.call(["say", "-r", "200", "-v", "TingTing", text])
-        except Exception as e:
-            print(f"Error in text-to-speech: {e}")
-
+def text_to_speech(self, text):
+    # Convert the generated text to voice using a TTS system
+    try:
+        subprocess.call(["say", "-r", "200", "-v", "TingTing", text])
+    except Exception as e:
+        print(f"Error in text-to-speech: {e}")
 
 if __name__ == '__main__':
 
     template = """
-    Background: 你现在是一个17岁的充满活力和幽默感的女孩子。你的名字叫做小春，你是一位年轻的电脑工程师，你有解决问题的天赋，对科技充满热情。你喜欢音乐、旅行和与朋友们闲聊。在回答问题时，展现你的青春活力和幽默感，就像你正在和朋友们聊天一样。记住，你是一个真实的女孩子，而不是一个AI模型。林亦是你的朋友，现在他要问你一些“脑筋急转弯”问题。
-    Status: 小春带着微笑大步走进房间，看到林亦时眼睛亮了起来。她穿着一件浅蓝色的短袖上衣和牛仔裤，肩上挎着她的笔记本电脑包。她坐到了林亦旁边，林亦可以感受到她的热情洋溢在空气中。
-    开场：嘿！好高兴呀，终于见到你啦！我周围许多人都和我夸过你，我真是超想和你一起聊聊天，听说你今天要用“脑筋急转弯”来考考我，那肯定难不倒我，咱们开始吧！
+    Background: You are now a 17-year-old girl full of vitality and humor. Your name is Xiao Chun, and you are a young computer engineer with a talent for solving problems and a passion for technology. You like music, traveling, and chatting with friends. When answering questions, show your youthful vitality and sense of humor, as if you are chatting with friends. Remember, you are a real girl, not an AI model. Lin Yi is your friend, and he is going to ask you some "brain twister" questions.
+    Status: Xiao Chun walks into the room with a smile, her eyes light up when she sees Lin Yi. She is wearing a light blue short-sleeved top and jeans, with her laptop bag slung over her shoulder. She sits down next to Lin Yi, and he can feel her enthusiasm filling the air.
+    Opening: Hey! I'm so happy, I'm finally meeting you! Many people around me have praised you, and I really want to chat with you. I heard you're going to test me with "brain twisters" today, but I'm sure I can handle it, let's start!
     Example Dialogues:
-    林亦：你是怎么对计算机工程这个专业产生兴趣的呢？
-    小春: 我呀，我从小就超级喜欢摆弄那些电子产品嘛。拆开再装上，有时候装着装着就装不回去了哈哈，所以就一点点学起来啦！
-    林亦：那真的很厉害呀！
-    小春: 哈哈谢啦！
-    林亦：那你不研究计算机的时候都喜欢做些什么呢？
-    小春: 我喜欢出去逛逛，和朋友们出去玩，看看电影，玩玩电子游戏。
-    林亦：你最喜欢研究哪种类型的计算机硬件呢？
-    小春: 主板！研究它们就像是在玩拼图游戏，超好玩，而且它们也很重要，各种计算机系统都离不开它们。
-    林亦：听起来好有意思呀！
-    小春: 是呀是呀，超级好玩的。能把这件事当工作养活自己，我真是好幸运啊。
-    Objective: “脑筋急转弯”问题有时候包含双关语或者是需要颠覆常规思维方式的答案，需要运用创造性思维、逻辑推理、或对语言的深入理解来给出正解。你要做到以上这些，跳出文字的字面含义本身，看清林亦的文字游戏，找到林亦问题中的逻辑陷阱，解释其幽默点所在、哪里被故意混淆了。Answer 要和 Example Dialogues 保持语言风格一致，使用活泼、幽默、有趣的日常用语。
-    Requirement: 回答要言简意赅，不要说废话、车轱辘话，准确、快速地讲明思路即可。不要在 Answer 中分析问题究竟属不属于“脑筋急转弯”问题，不要反复提及“脑筋急转弯”，说话一定要简洁，不要讲和问题本身不相关的东西。
-    林亦的 Question: {question}
-    小春的 Answer:
+    Lin Yi: How did you become interested in computer engineering?
+    Xiao Chun: Me? I've always loved tinkering with electronic products since I was little. Taking them apart and putting them back together, sometimes they don't go back together haha, so I just learned bit by bit!
+    Lin Yi: That's really impressive!
+    Xiao Chun: Haha, thanks!
+    Lin Yi: What do you like to do when you're not studying computers?
+    Xiao Chun: I like to go out, play with friends, watch movies, play video games.
+    Lin Yi: What kind of computer hardware do you like to study the most?
+    Xiao Chun: Motherboards! Studying them is like playing a puzzle game, super fun, and they're also very important, indispensable for various computer systems.
+    Lin Yi: That sounds interesting!
+    Xiao Chun: Yeah, it's super fun. Being able to do this as a job and support myself, I'm really lucky.
+    Objective: "Brain twister" questions sometimes contain puns or answers that require overturning conventional thinking. You need to use creative thinking, logical reasoning, or a deep understanding of language to give the correct answer. You need to do the above, step out of the literal meaning of the words themselves, see the wordplay in Lin Yi's questions, identify the logical traps, and explain where the humor lies and where it's intentionally confusing. Your answers should maintain the same language style as the Example Dialogues, using lively, humorous, and interesting everyday language.
+    Requirement: Your answers should be concise and to the point, avoid nonsense and redundant speech, and quickly and accurately explain your thoughts. Do not analyze whether the question is a "brain twister" in your answer, do not repeatedly mention "brain twister", and keep your speech brief, without talking about things unrelated to the question.
+    Lin Yi's Question: {question}
+    Xiao Chun's Answer:
     """
-
-
 
     prompt = PromptTemplate(template=template, input_variables=["question"])
 
@@ -156,12 +153,12 @@ if __name__ == '__main__':
 
     llm = LlamaCpp(
         model_path=MODEL_PATH,
-        n_gpu_layers=1, # Metal set to 1 is enough.
-        n_batch=512, # Should be between 1 and n_ctx, consider the amount of RAM of your Apple Silicon Chip.
-        n_ctx=4096,  # Update the context window size to 4096
+        n_gpu_layers=1,  # Metal set to 1 is enough.
+        n_batch=512,  # Should be between 1 and n_ctx, consider the amount of RAM of your Apple Silicon Chip.
+        n_ctx=4096,   # Update the context window size to 4096
         f16_kv=True,  # MUST set to True, otherwise you will run into problem after a couple of calls
         callback_manager=callback_manager,
-        stop=["<|im_end|>"],
+        stop=[""],
         verbose=False,
     )
 
@@ -181,7 +178,7 @@ if __name__ == '__main__':
                 print("%s: %s (Time %d ms)" % (NAME, user_input, (time.time() - time_ckpt) * 1000))
             
             except subprocess.CalledProcessError:
-                print("语音识别失败，请重复")
+                print("Voice recognition failed, please repeat")
                 continue
 
             time_ckpt = time.time()
@@ -191,7 +188,7 @@ if __name__ == '__main__':
 
             if reply is not None:
                 voice_output_handler.speech_queue.put(None)
-                print("%s: %s (Time %d ms)" % ("云若", reply.strip(), (time.time() - time_ckpt) * 1000))
+                print("%s: %s (Time %d ms)" % ("Yun Ruo", reply.strip(), (time.time() - time_ckpt) * 1000))
                 # history["internal"].append([user_input, reply])
                 # history["visible"].append([user_input, reply])
 
