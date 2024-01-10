@@ -1,7 +1,7 @@
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.chains import LLMChain
-from langchain.llms import LlamaCpp
+from langchain_community import LlamaCpp
 from langchain.prompts import PromptTemplate
 
 import time
