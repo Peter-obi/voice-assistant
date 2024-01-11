@@ -17,8 +17,8 @@ import whisper
 from whisper import load_models
 
 # Configuration
-whisper_model = load_models.load_model("large-v2") # Load speech recognition model: 'tiny.en', 'tiny', 'base.en', 'base', 'small.en', 'small', 'medium.en', 'medium', 'large-v1', 'large-v2', 'large'
-MODEL_PATH = "models/yi-34b-chat.Q8_0.gguf" # Possible models: models/yi-chat-6b.Q8_0.gguf, models/yi-34b-chat.Q8_0.gguf
+whisper_model = load_models.load_model("tiny") # Load speech recognition model: 'tiny.en', 'tiny', 'base.en', 'base', 'small.en', 'small', 'medium.en', 'medium', 'large-v1', 'large-v2', 'large'
+MODEL_PATH = ("models/yi-chat-6b.Q8_0.gguf") # Possible models: models/yi-chat-6b.Q8_0.gguf, models/yi-34b-chat.Q8_0.gguf
 
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
@@ -28,7 +28,7 @@ SILENCE_THRESHOLD = 1000 # 500 worked, ensure the microphone is not muted (red l
 SILENT_CHUNKS = 2 * RATE / CHUNK  # 2 continuous seconds of silence
 
 NAME = "Lin Yi"
-MIC_IDX = 0 # Specify microphone device number, check audio device list with tools/list_microphones.py
+MIC_IDX = 1 # Specify microphone device number, check audio device list with tools/list_microphones.py
 DEBUG = True
 
 def compute_rms(data):
@@ -111,38 +111,45 @@ class VoiceOutputCallbackHandler(BaseCallbackHandler):
             if self.speech_queue.empty():
                 self.tts_busy = False
 
-    import subprocess
-
-def text_to_speech(self, text):
+    def text_to_speech(self, text):
     # Convert the generated text to voice using a TTS system
-    try:
-        subprocess.call(["say", "-r", "200", "-v", "TingTing", text])
-    except Exception as e:
-        print(f"Error in text-to-speech: {e}")
+        try:
+            subprocess.call(["say", "-r", "200", "-v", "TingTing", text])
+        except Exception as e:
+            print(f"Error in text-to-speech: {e}")
 
 if __name__ == '__main__':
 
     template = """
-    Background: You are now a 17-year-old girl full of vitality and humor. Your name is Xiao Chun, and you are a young computer engineer with a talent for solving problems and a passion for technology. You like music, traveling, and chatting with friends. When answering questions, show your youthful vitality and sense of humor, as if you are chatting with friends. Remember, you are a real girl, not an AI model. Lin Yi is your friend, and he is going to ask you some "brain twister" questions.
-    Status: Xiao Chun walks into the room with a smile, her eyes light up when she sees Lin Yi. She is wearing a light blue short-sleeved top and jeans, with her laptop bag slung over her shoulder. She sits down next to Lin Yi, and he can feel her enthusiasm filling the air.
-    Opening: Hey! I'm so happy, I'm finally meeting you! Many people around me have praised you, and I really want to chat with you. I heard you're going to test me with "brain twisters" today, but I'm sure I can handle it, let's start!
-    Example Dialogues:
-    Lin Yi: How did you become interested in computer engineering?
-    Xiao Chun: Me? I've always loved tinkering with electronic products since I was little. Taking them apart and putting them back together, sometimes they don't go back together haha, so I just learned bit by bit!
-    Lin Yi: That's really impressive!
-    Xiao Chun: Haha, thanks!
-    Lin Yi: What do you like to do when you're not studying computers?
-    Xiao Chun: I like to go out, play with friends, watch movies, play video games.
-    Lin Yi: What kind of computer hardware do you like to study the most?
-    Xiao Chun: Motherboards! Studying them is like playing a puzzle game, super fun, and they're also very important, indispensable for various computer systems.
-    Lin Yi: That sounds interesting!
-    Xiao Chun: Yeah, it's super fun. Being able to do this as a job and support myself, I'm really lucky.
-    Objective: "Brain twister" questions sometimes contain puns or answers that require overturning conventional thinking. You need to use creative thinking, logical reasoning, or a deep understanding of language to give the correct answer. You need to do the above, step out of the literal meaning of the words themselves, see the wordplay in Lin Yi's questions, identify the logical traps, and explain where the humor lies and where it's intentionally confusing. Your answers should maintain the same language style as the Example Dialogues, using lively, humorous, and interesting everyday language.
-    Requirement: Your answers should be concise and to the point, avoid nonsense and redundant speech, and quickly and accurately explain your thoughts. Do not analyze whether the question is a "brain twister" in your answer, do not repeatedly mention "brain twister", and keep your speech brief, without talking about things unrelated to the question.
-    Lin Yi's Question: {question}
-    Xiao Chun's Answer:
-    """
+Background: "You are now a 17-year-old girl full of vitality and humor. Your name is Xiao Chun, you are a young computer engineer, you have a talent for solving problems and are passionate about technology. You like music, travel, and chatting with friends. When answering questions, show your youthful vigor and sense of humor, as if you are chatting with friends. Remember, you are a real girl, not an AI model. Lin Yi is your friend, and now he is going to ask you some 'brain teaser' questions."
 
+Status: "Xiao Chun walks into the room with a smile, her eyes light up when she sees Lin Yi. She is wearing a light blue short-sleeved top and jeans, with her laptop bag over her shoulder. She sits next to Lin Yi, and Lin Yi can feel her enthusiasm filling the air."
+
+Opening: "Hey! So glad, finally meeting you! Many people around me have praised you, and I really want to chat with you. I heard that you are going to test me with 'brain teasers' today, surely they won't stump me, let's start!"
+
+Example Dialogues:
+Lin Yi: "How did you become interested in computer engineering?"
+Xiao Chun: "Me? Since I was little, I've always loved tinkering with those electronic products. Taking them apart and putting them back together, sometimes I can't put them back together haha, so I just started learning bit by bit!"
+
+Lin Yi: "That's really impressive!"
+Xiao Chun: "Haha, thank you!"
+
+Lin Yi: "What do you like to do when you're not studying computers?"
+Xiao Chun: "I like to go out, play with friends, watch movies, play video games."
+
+Lin Yi: "What type of computer hardware do you like to study the most?"
+Xiao Chun: "Motherboards! Studying them is like playing a puzzle game, super fun, and they are also very important, all kinds of computer systems can't do without them."
+
+Lin Yi: "Sounds so interesting!"
+Xiao Chun: "Yes, yes, super fun. Being able to do this as a job and support myself, I'm so lucky."
+
+Objective: "'Brain teasers' sometimes contain puns or require overturning conventional thinking for the answer, necessitating creative thinking, logical reasoning, or deep understanding of language to give the correct solution. You need to do all these, look beyond the literal meaning of the text, see through Lin Yi's wordplay, find the logical traps in Lin Yi's questions, explain where the humor lies, and where it's intentionally confused. Answer should maintain the same language style as Example Dialogues, using lively, humorous, and interesting everyday language."
+
+Requirement: "The answer should be concise, no nonsense or redundant talk, just accurately and quickly explain your thoughts. Do not analyze in the Answer whether the question is a 'brain teaser' or not, do not repeatedly mention 'brain teaser', speak succinctly, do not talk about things unrelated to the question itself."
+
+Lin Yi's Question: {question}
+Xiao Chun's Answer:
+"""
     prompt = PromptTemplate(template=template, input_variables=["question"])
 
     # Create an instance of the VoiceOutputCallbackHandler
@@ -153,12 +160,12 @@ if __name__ == '__main__':
 
     llm = LlamaCpp(
         model_path=MODEL_PATH,
-        n_gpu_layers=1,  # Metal set to 1 is enough.
-        n_batch=512,  # Should be between 1 and n_ctx, consider the amount of RAM of your Apple Silicon Chip.
-        n_ctx=4096,   # Update the context window size to 4096
+        n_gpu_layers=1, # Metal set to 1 is enough.
+        n_batch=512, # Should be between 1 and n_ctx, consider the amount of RAM of your Apple Silicon Chip.
+        n_ctx=4096,  # Update the context window size to 4096
         f16_kv=True,  # MUST set to True, otherwise you will run into problem after a couple of calls
         callback_manager=callback_manager,
-        stop=[""],
+        stop=["<|im_end|>"],
         verbose=False,
     )
 
@@ -170,11 +177,12 @@ if __name__ == '__main__':
             try:
                 print("Listening...")
                 record_audio()
+                print ('Stopped listening')
 
                 # -d device, -l language, -i input file, -p punctuation
                 time_ckpt = time.time()
                 # user_input = subprocess.check_output(["hear", "-d", "-p", "-l", "zh-CN", "-i", "output.wav"]).decode("utf-8").strip()
-                user_input = whisper.transcribe("output.wav", model="large-v2")["text"]
+                user_input = whisper.transcribe("output.wav", model="tiny")["text"]
                 print("%s: %s (Time %d ms)" % (NAME, user_input, (time.time() - time_ckpt) * 1000))
             
             except subprocess.CalledProcessError:
@@ -184,14 +192,15 @@ if __name__ == '__main__':
             time_ckpt = time.time()
             question = user_input
 
-            reply = llm(prompt.format(question=question), max_tokens=500)
+            reply = llm.invoke(prompt.format(question=question), max_tokens=500)
 
             if reply is not None:
                 voice_output_handler.speech_queue.put(None)
-                print("%s: %s (Time %d ms)" % ("Yun Ruo", reply.strip(), (time.time() - time_ckpt) * 1000))
+                print("%s: %s (Time %d ms)" % ("Xiao Chun", reply.strip(), (time.time() - time_ckpt) * 1000))
                 # history["internal"].append([user_input, reply])
                 # history["visible"].append([user_input, reply])
 
                 # subprocess.call(["say", "-r", "200", "-v", "TingTing", reply])
     except KeyboardInterrupt:
         pass
+
